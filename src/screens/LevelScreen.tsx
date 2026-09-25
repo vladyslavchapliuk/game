@@ -22,7 +22,7 @@ import { go } from '../router';
 
 export function LevelScreen({ id }: { id: string }) {
   const found = findLevel(id);
-  const { finishLevel, settings, isLevelUnlocked } = useStore();
+  const { finishLevel, settings } = useStore();
   const [seed] = useState(newSeed);
   // Keyed by id + seed only, so generated data (and plan arrays) stay stable across renders.
   const steps = useMemo<Step[]>(() => findLevel(id)?.level.steps(makeRng(seed)) ?? [], [id, seed]);
@@ -34,15 +34,6 @@ export function LevelScreen({ id }: { id: string }) {
   const onMood = useCallback((m: Mood, line: string) => setMood({ m, line }), []);
 
   if (!found) return <div className="page"><div className="parchment">Level not found. <a href="#/map">Back to the map</a></div></div>;
-  if (!isLevelUnlocked(id)) {
-    return (
-      <div className="page">
-        <RoomBackdrop room={found.world.room} />
-        <Mission kicker={`World ${found.world.id} / ${found.world.topic}`} title="This level is still locked" sub="Pass the previous level first, or turn on practice mode in Settings." />
-        <button className="tb" onClick={() => go(`room/${found.world.id}`)}>Back to {found.world.name}</button>
-      </div>
-    );
-  }
 
   const { world, level } = found;
   const step = steps[index];

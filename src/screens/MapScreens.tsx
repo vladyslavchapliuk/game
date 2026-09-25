@@ -12,7 +12,7 @@ const NODES: Record<string, [number, number]> = {
 };
 
 export function MapScreen() {
-  const { resolvedTheme, progress, isWorldUnlocked } = useStore();
+  const { resolvedTheme, progress } = useStore();
   const cleared = WORLDS.filter((w) => w.levels.length && w.levels.every((l) => progress.levels[l.id]?.passed)).length;
   return (
     <div className="page" style={{ maxWidth: 1400, paddingTop: 0 }}>
@@ -26,15 +26,15 @@ export function MapScreen() {
         </a>
         {WORLDS.filter((w) => NODES[w.room] && w.id <= 6).map((w) => {
           const [tx, ty] = NODES[w.room];
-          const unlocked = isWorldUnlocked(w.id) && w.levels.length > 0;
+          const unlocked = w.levels.length > 0;
           const stars = w.levels.reduce((s, l) => s + (progress.levels[l.id]?.stars ?? 0), 0);
           const done = w.levels.length > 0 && w.levels.every((l) => progress.levels[l.id]?.passed);
           const started = w.levels.some((l) => progress.levels[l.id]);
-          const status = !w.levels.length ? 'COMING SOON' : !unlocked ? `LOCKED · FINISH ROOM ${w.id - 1}` : done ? `${stars}★ COMPLETE` : started ? 'CONTINUE →' : 'PLAY NEXT →';
+          const status = !unlocked ? 'COMING SOON' : done ? `${stars}★ COMPLETE` : started ? 'CONTINUE →' : 'PLAY →';
           const style = { left: `${((tx + 127) / 1440) * 100}%`, top: `${((ty + 262) / 900) * 100}%` };
           const inner = (
             <>
-              <span className={`medal ${unlocked ? '' : 'locked'}`}>{unlocked ? w.id : <img src={iconSrc('lock')} alt="" />}</span>
+              <span className={`medal ${unlocked ? '' : 'soon'}`}>{unlocked ? w.id : <img src={iconSrc('hourglass')} alt="" />}</span>
               <span className="plank map-plaque"><b>{w.name}</b><small>{status}</small></span>
             </>
           );
@@ -49,7 +49,7 @@ export function MapScreen() {
 
 export function RoomScreen({ worldId }: { worldId: number }) {
   const w = WORLDS.find((x) => x.id === worldId);
-  const { progress, isLevelUnlocked } = useStore();
+  const { progress } = useStore();
   if (!w) return null;
   return (
     <div className="page">
@@ -66,20 +66,16 @@ export function RoomScreen({ worldId }: { worldId: number }) {
       <div className="levels">
         {w.levels.map((l) => {
           const p = progress.levels[l.id];
-          const open = isLevelUnlocked(l.id);
-          const body = (
-            <>
-              <span className={`medal ${open ? '' : 'locked'}`}>{open ? l.id.split('.')[1] : <img src={iconSrc('lock')} alt="" />}</span>
+          return (
+            <a key={l.id} className="parchment level-row" href={href(`play/${l.id}`)}>
+              <span className="medal">{l.id.split('.')[1]}</span>
               <span>
                 <h3>{l.title}</h3>
-                <p>{l.subtitle}{open ? '' : ' · pass the previous level to unlock'}</p>
+                <p>{l.subtitle}</p>
               </span>
-              <span>{p ? <Stars n={p.stars} /> : open ? <span className="tb small green">Play</span> : null}</span>
-            </>
+              <span>{p ? <Stars n={p.stars} /> : <span className="tb small green">Play</span>}</span>
+            </a>
           );
-          return open
-            ? <a key={l.id} className="parchment level-row" href={href(`play/${l.id}`)}>{body}</a>
-            : <div key={l.id} className="parchment level-row" data-locked="true">{body}</div>;
         })}
       </div>
     </div>

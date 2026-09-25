@@ -10,7 +10,7 @@ import { Rich, Stars } from '../components/Rich';
 import { go } from '../router';
 
 export function OutcomeScreen() {
-  const { lastRun, settings, mastery, isLevelUnlocked } = useStore();
+  const { lastRun, settings, mastery } = useStore();
   const [replay, setReplay] = useState(false);
   if (!lastRun) {
     return <div className="page"><div className="parchment">No finished shift yet. <a href="#/map">Go to the brewery</a></div></div>;
@@ -136,7 +136,7 @@ export function OutcomeScreen() {
             </div>
           )}
           <div className="row">
-            {grade.passed && next && isLevelUnlocked(next) && <button className="tb green" onClick={() => go(`play/${next}`)} autoFocus>Next level</button>}
+            {next && <button className={grade.passed ? 'tb green' : 'tb'} onClick={() => go(`play/${next}`)} autoFocus={grade.passed}>Next level</button>}
             <button className="tb" onClick={() => go(`play/${lastRun.levelId}?r=${Date.now()}`)}>Try again</button>
             <button className="tb" onClick={() => go(`room/${found.world.id}`)}>Room</button>
             <button className="tb" onClick={() => go('map')}>Map</button>

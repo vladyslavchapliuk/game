@@ -1,7 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Grade, StepRecord } from '../engine/outcome';
 import { coinsFor } from '../engine/outcome';
-import { WORLDS } from '../content/worlds';
 
 export type ThemeSetting = 'auto' | 'sunny' | 'evening';
 export interface Settings {
@@ -10,7 +9,6 @@ export interface Settings {
   sound: boolean;
   reducedMotion: boolean;
   skipCutscenes: boolean;
-  unlockAll: boolean;
 }
 export interface LevelProgress { stars: number; passed: boolean; plays: number }
 export interface CardState { box: number; due: number }
@@ -24,7 +22,7 @@ export interface Progress {
 }
 export interface LastRun { levelId: string; grade: Grade; records: StepRecord[]; coins: number; seed: number }
 
-const DEFAULT_SETTINGS: Settings = { theme: 'auto', soda: false, sound: true, reducedMotion: false, skipCutscenes: false, unlockAll: false };
+const DEFAULT_SETTINGS: Settings = { theme: 'auto', soda: false, sound: true, reducedMotion: false, skipCutscenes: false };
 const EMPTY: Progress = { levels: {}, coins: 0, concepts: {}, cards: {}, onboarded: false };
 const KEY = 'monkey-brewery/v1';
 
@@ -47,8 +45,6 @@ interface Store {
   resolvedTheme: 'sunny' | 'evening';
   setSetting: <K extends keyof Settings>(key: K, value: Settings[K]) => void;
   finishLevel: (run: Omit<LastRun, 'coins'>) => LastRun;
-  isLevelUnlocked: (id: string) => boolean;
-  isWorldUnlocked: (worldId: number) => boolean;
   mastery: (conceptPrefix: string) => number | undefined;
   reviewCard: (id: string, ok: 'again' | 'hard' | 'good') => void;
   setOnboarded: () => void;
@@ -111,25 +107,6 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     return full;
   }, []);
 
-  const isWorldUnlocked = useCallback((worldId: number) => {
-    // Independent entry points: basics (1), planning over time (4) and the Factory Yard (7).
-    if (settings.unlockAll || worldId === 1 || worldId === 4 || worldId === 7) return true;
-    const prev = WORLDS.find((w) => w.id === worldId - 1);
-    if (!prev || prev.levels.length === 0) return false;
-    return !!progress.levels[prev.levels[prev.levels.length - 1].id]?.passed;
-  }, [settings.unlockAll, progress.levels]);
-
-  const isLevelUnlocked = useCallback((id: string) => {
-    if (settings.unlockAll) return true;
-    for (const w of WORLDS) {
-      const i = w.levels.findIndex((l) => l.id === id);
-      if (i < 0) continue;
-      if (!isWorldUnlocked(w.id)) return false;
-      return i === 0 || !!progress.levels[w.levels[i - 1].id]?.passed;
-    }
-    return false;
-  }, [settings.unlockAll, progress.levels, isWorldUnlocked]);
-
   const mastery = useCallback((prefix: string) => {
     const all = Object.entries(progress.concepts).filter(([k]) => k.startsWith(prefix)).flatMap(([, v]) => v);
     if (all.length === 0) return undefined;
@@ -148,7 +125,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const totalStars = Object.values(progress.levels).reduce((s, l) => s + l.stars, 0);
 
   const value: Store = {
-    settings, progress, lastRun, resolvedTheme, setSetting, finishLevel, isLevelUnlocked, isWorldUnlocked, mastery, reviewCard,
+    settings, progress, lastRun, resolvedTheme, setSetting, finishLevel, mastery, reviewCard,
     setOnboarded: () => setProgress((p) => ({ ...p, onboarded: true })),
     resetProgress: () => { setProgress({ ...EMPTY, onboarded: true }); setLastRun(undefined); },
     totalStars,

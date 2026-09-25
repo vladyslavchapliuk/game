@@ -1,4 +1,4 @@
-node_modules/
+node_modules
 .cache/
 *.timestamp-*.mjs
 *.log

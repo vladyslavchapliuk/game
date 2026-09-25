@@ -10,6 +10,7 @@ A cozy 2D browser game for learning OPM 301 (Operations Management, Production p
 
 ## New in v0.4
 
+- **Everything is open:** every room and level can be played from the start, in any order. Stars and mastery still track your progress.
 - **World 4, Barrel Cellar (aggregate planning), 8 levels:** production/cost tables over time, laid out like the lecture: $d_t$, $X_t$, $L_t$, $O_t$, $B_t$, inventory, overtime and backlog costs, and a sum column.
   - Uses the lecture example: 8 periods, $c = 750$, $k^l = 22$, $k^o = 72$. Chase costs 59,760, level 33,220, and the optimum 30,940.
   - Also covers the price shock ($k^o = 32$ / 112) and backlog ($k^b = 18$ → 30,700).
@@ -45,7 +46,7 @@ A cozy 2D browser game for learning OPM 301 (Operations Management, Production p
   - 4 missions (30, 60, 90 and 80 L/h). Each has a budget and limited floor space. The goal is to meet demand at the lowest cost, and a solver knows the cheapest plan: cheapest = perfect, within 15% = good enough, overbuilt = too much, short of demand = too little.
   - **Free build** has no budget and lets you set any demand.
 - **Outcomes and cutscenes:** perfect (beach), good enough (banana), too much, too little (pink slip), bottleneck fail (wort surfing) and wrong classification. Cutscenes can be skipped, and each one is followed by a "What happened?" card with the numbers.
-- **Study desk:** flashcards with spaced repetition, a formula sheet and a glossary. Also included: sandbox, mastery, settings (theme, soda mode, reduced motion, skip cutscenes, practice mode that unlocks everything).
+- **Study desk:** flashcards with spaced repetition, a formula sheet and a glossary. Also included: sandbox, mastery, settings (theme, soda mode, reduced motion, skip cutscenes).
 - **Design (v0.3):** one slim top bar with navigation (no floating dock), a dimmed room backdrop, and clean inked cards.
 - Worlds 3 and 6, Exam drill, Duel, Study room and Leaderboard show "coming soon".
 

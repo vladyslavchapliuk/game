@@ -214,7 +214,6 @@ export function SettingsScreen() {
         <Toggle label="Sound effects" help="Clinks, cheers and bubbles." checked={settings.sound} onChange={(v) => setSetting('sound', v)} />
         <Toggle label="Reduced motion" help="No paddle, bubble or transfer motion; cutscenes show the final still." checked={settings.reducedMotion} onChange={(v) => setSetting('reducedMotion', v)} />
         <Toggle label="Skip all cutscenes" help="Go straight to the numbers after each level." checked={settings.skipCutscenes} onChange={(v) => setSetting('skipCutscenes', v)} />
-        <Toggle label="Practice mode: unlock everything" help="Jump to any level. Stars still count." checked={settings.unlockAll} onChange={(v) => setSetting('unlockAll', v)} />
         <div className="setting">
           <span><b>Reset progress</b><small>Stars, coins, mastery and flashcards on this computer.</small></span>
           {confirm

@@ -162,7 +162,7 @@ p + p { margin-top: 10px; }
 .map-wrap > img { position: absolute; inset: 0; width: 100%; height: 100%; border-radius: 18px; border: 3px solid var(--ink); box-shadow: 0 5px 0 var(--ink); }
 .map-node { position: absolute; transform: translate(-50%, -50%); display: grid; justify-items: center; gap: 6px; text-decoration: none; color: #FFF1CD; }
 .medal { width: clamp(44px, 4.4vw, 64px); height: clamp(44px, 4.4vw, 64px); border-radius: 50%; border: 4px solid var(--ink); background: radial-gradient(circle at 50% 35%, #4B6A3C, #2B3E28); color: #FFF1CD; display: grid; place-items: center; font-size: clamp(20px, 2vw, 30px); font-weight: 900; box-shadow: 0 0 0 3px #E8B961, 0 4px 0 3px var(--ink); }
-.medal.locked { background: radial-gradient(circle at 50% 35%, #4A3F31, #2E271E); }
+.medal.soon { background: radial-gradient(circle at 50% 35%, #4A3F31, #2E271E); }
 .medal img { width: 60%; }
 .map-plaque { padding: 6px 18px 8px; text-align: center; min-width: clamp(150px, 17vw, 250px); }
 .map-plaque b { display: block; font-size: clamp(14px, 1.45vw, 20px); }
@@ -178,7 +178,6 @@ a.map-node:hover .medal { transform: translateY(-2px); }
 .level-row .medal { width: 52px; height: 52px; font-size: 18px; }
 .level-row h3 { margin: 0; font-size: 20px; }
 .level-row p { color: var(--muted); font-weight: 700; font-size: 15px; margin: 0; }
-.level-row[data-locked='true'] { opacity: .65; }
 a.level-row:hover { transform: translateY(-2px); }
 .stars { display: inline-flex; gap: 2px; font-size: 22px; color: #C9972E; text-shadow: 0 1px 0 var(--ink); }
 .stars .off { color: var(--soft); text-shadow: none; }
