@@ -1,0 +1,14 @@
+{
+  "name": "Monkey Brewery: OPM 301",
+  "short_name": "Monkey Brewery",
+  "description": "Learn Operations Management by running Bruno's brewery.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F7EDD9",
+  "theme_color": "#365B48",
+  "icons": [
+    { "src": "assets/icons/app-icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "assets/icons/app-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

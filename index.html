@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#365B48" />
+    <meta name="description" content="Monkey Brewery: learn OPM 301 by running Bruno's brewery." />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="icon" href="assets/icons/app-icon-192.png" />
+    <link rel="apple-touch-icon" href="assets/icons/app-icon-192.png" />
+    <script>
+      // Opened by double-click from the project folder? Jump to the built game.
+      if (location.protocol === 'file:' && !/[\\/]dist[\\/]/.test(decodeURIComponent(location.pathname))) {
+        location.replace('dist/index.html' + location.hash);
+      }
+    </script>
+    <title>Monkey Brewery: OPM 301</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

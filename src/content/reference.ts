@@ -1,0 +1,82 @@
+// Study desk content: formula sheet, glossary and flashcards for worlds 1–2.
+
+export interface Formula { name: string; tex: string; note: string; world: number; topic: string }
+export const FORMULAS: Formula[] = [
+  // Lecture I — process analysis
+  { world: 2, topic: 'Process analysis', name: 'Resource capacity', tex: '\\text{capacity} = \\frac{60}{\\text{min per unit}} \\times \\text{machines}', note: 'Units per hour one resource can do (packing machine: 60/2 = 30 per hour).' },
+  { world: 2, topic: 'Process analysis', name: 'Cycle time', tex: 'W_s = \\sum_{i} t_i', note: 'Time one unit needs through the line: sum of activity durations (knife line: 26 min).' },
+  { world: 2, topic: 'Process analysis', name: 'Process capacity', tex: '\\min\\{\\text{cap}_1, \\dots, \\text{cap}_n\\}', note: 'Set by the bottleneck, the resource with the smallest capacity.' },
+  { world: 2, topic: 'Process analysis', name: 'Throughput', tex: '\\text{th} = \\min\\{\\text{demand}, \\text{process capacity}\\}', note: 'Supply-constrained if demand ≥ capacity, else demand-constrained.' },
+  { world: 2, topic: 'Process analysis', name: 'Utilization', tex: 'u = \\frac{\\text{actual production rate}}{\\text{maximum production rate}}', note: 'Packing machine: 25 / 30 = 83.33%. Only the bottleneck reaches 100%.' },
+  { world: 2, topic: 'Process analysis', name: 'Processing time of a batch', tex: 't = \\frac{\\text{batch size}}{\\text{capacity}} \\times 3600\\ \\text{s}', note: 'Brewhouse: 0.1 L at 60 / 40 / 50 L/h → 6 / 9 / 7.2 s.' },
+  // Lecture II ch. 4 — aggregate planning
+  { world: 4, topic: 'Aggregate planning', name: 'Inventory balance', tex: 'L_{t-1} + X_t - d_t = L_t, \\quad L_0 = 0', note: 'With $L_t \\ge 0$ it forces demand to be met in every period.' },
+  { world: 4, topic: 'Aggregate planning', name: 'Capacity with overtime', tex: 'X_t \\le c + O_t', note: 'Overtime $O_t$ extends capacity at $k^o$ per unit.' },
+  { world: 4, topic: 'Aggregate planning', name: 'Relevant costs', tex: 'Z = \\sum_{t=1}^{T} k^l L_t + \\sum_{t=1}^{T} k^o O_t', note: 'Chase 59,760 · Level 33,220 · Optimal 30,940 EUR.' },
+  { world: 4, topic: 'Aggregate planning', name: 'Balance with backlog', tex: '\\begin{gathered} L_{t-1} - B_{t-1} + X_t - d_t = L_t - B_t \\\\ B_T = 0 \\end{gathered}', note: 'Backlog $B_t$ costs $k^b$ per unit and period ($k^b = 18$ → 30,700 EUR).' },
+  { world: 4, topic: 'Aggregate planning', name: 'Backlog', tex: 'B_t = \\Big(\\sum_{\\tau \\le t} d_\\tau - \\sum_{\\tau \\le t} X_\\tau\\Big)^{+}', note: 'Cumulative demand minus cumulative production, if positive.' },
+  // Lecture II ch. 5 — lot sizing
+  { world: 5, topic: 'Lot sizing', name: 'Share of effective production time', tex: '\\frac{\\text{production time}}{\\text{setup time} + \\text{production time}}', note: 'Rises with the lot size: setup time is spread over more units.' },
+  { world: 5, topic: 'Lot sizing', name: 'Setup forcing (big M)', tex: 'X_t \\le M \\cdot \\Gamma_t, \\quad \\Gamma_t \\in \\{0;1\\}', note: 'Production only after a setup; $M \\ge c$.' },
+  { world: 5, topic: 'Lot sizing', name: 'Relevant costs', tex: 'Z = \\sum_{t=1}^{T} \\big(k^l L_t + s\\,\\Gamma_t\\big)', note: 'Lot-for-lot 1,000 · lot = capacity 900 · optimal 580 EUR.' },
+  { world: 5, topic: 'Lot sizing', name: 'Shared capacity (multi-product)', tex: '\\sum_{i=1}^{I} a_i X_{it} \\le c \\quad \\forall t', note: 'Two products, $a_1 = a_2 = 1$ h/unit, $c = 150$ h → 995 EUR.' },
+  // Tutorials 6–7 — stochastic variability and queues
+  { world: 6, topic: 'Stochastic variability', name: 'Expected value', tex: 'E[X] = \\sum_i x_i \\cdot p(x_i)', note: 'Machines 1 and 2: E[X] = 35.6 s.' },
+  { world: 6, topic: 'Stochastic variability', name: 'Variance and standard deviation', tex: '\\begin{gathered} V[X] = \\sum_i (x_i - E[X])^2 \\, p(x_i) \\\\ \\sigma = \\sqrt{V[X]} \\end{gathered}', note: 'Machine 1: $V[X] = 37.14\\ \\text{s}^2$, $\\sigma = 6.09$ s.' },
+  { world: 6, topic: 'Stochastic variability', name: 'Coefficient of variation', tex: 'cv = \\frac{\\sigma}{E[X]}', note: 'Machine 1: 0.17 vs. machine 2: 0.10 → machine 1 is more variable.' },
+  { world: 6, topic: 'Queues', name: 'Utilization', tex: '\\rho = \\frac{\\lambda}{\\mu}', note: 'Depends only on the means, not on variability.' },
+  { world: 6, topic: 'Queues', name: 'Expected waiting time (single server)', tex: 'E[W_q] = \\frac{cv_a^2 + cv_s^2}{2} \\cdot \\frac{\\rho}{1-\\rho} \\cdot \\frac{1}{\\mu}', note: 'Exercise 7: $cv_a^2 = 0$, $cv_s^2 = 1.2$, $\\rho = 8/9$ → 384 min.' },
+  { world: 6, topic: 'Queues', name: 'Cycle time', tex: 'E[W_s] = E[W_q] + \\frac{1}{\\mu}', note: '384 + 80 = 464 min.' },
+  { world: 6, topic: "Queues", name: "Little's law", tex: 'E[L_s] = \\lambda \\cdot E[W_s]', note: '(60/90) × (464/60) = 5.16 workpieces.' },
+];
+
+export interface Term { term: string; def: string; world: number }
+export const GLOSSARY: Term[] = [
+  { world: 1, term: 'Operations management', def: 'Management and engineering approaches for effective planning of resources and activities in production and service systems and networks, from the strategic down to the control level.' },
+  { world: 1, term: 'Production management', def: 'Management of business operations related to manufacturing goods.' },
+  { world: 1, term: 'Service operations management', def: 'Management of business operations related to providing services.' },
+  { world: 1, term: 'Procurement & supply chain management', def: 'Management of storage, transportation and delivery of goods along the supply chain.' },
+  { world: 1, term: 'Operations planning', def: 'How to use capacity.' },
+  { world: 1, term: 'Capacity planning', def: 'How to set capacity.' },
+  { world: 1, term: 'Variability', def: 'Changes in volume or time due to uncertainty, time dependency or heterogeneity.' },
+  { world: 1, term: 'Uncertainty', def: 'Deterministic (known in advance) vs. stochastic (random).' },
+  { world: 1, term: 'Dynamics', def: 'Stationary (characteristics do not change over time) vs. time-dependent.' },
+  { world: 1, term: 'Heterogeneity', def: 'Homogeneous (one kind) vs. heterogeneous (product variants, customer classes, resource types).' },
+  { world: 2, term: 'Flow unit', def: 'What flows through the process: customers, data, material, cash.' },
+  { world: 2, term: 'Capacity', def: 'Maximum number of units a resource can produce per period.' },
+  { world: 2, term: 'Bottleneck', def: 'Resource with the smallest capacity; determines process capacity.' },
+  { world: 2, term: 'Process capacity', def: 'Maximum amount the process can supply = minimum resource capacity.' },
+  { world: 2, term: 'Throughput', def: 'Actual output rate = min(demand, process capacity).' },
+  { world: 2, term: 'Cycle time', def: 'Time a flow unit needs through the process = sum of activity durations.' },
+  { world: 2, term: 'Utilization', def: 'Actual production rate divided by maximum production rate.' },
+  { world: 2, term: 'Supply-constrained', def: 'Demand exceeds process capacity; the bottleneck limits throughput.' },
+  { world: 2, term: 'Demand-constrained', def: 'Process capacity exceeds demand; demand limits throughput.' },
+  { world: 2, term: 'Balanced flow', def: 'All activities synchronized with the bottleneck activity.' },
+  { world: 4, term: 'Aggregate planning', def: 'Decides production volume over time for aggregated product types with global capacities; trades off overtime and inventory holding.' },
+  { world: 4, term: 'Chase strategy', def: 'Production equals demand in each period; capacity adapted by overtime; no inventory.' },
+  { world: 4, term: 'Level strategy', def: 'Constant production volume (average demand); inventory rises and falls.' },
+  { world: 4, term: 'Inventory holding costs', def: 'Cost of capital, depreciation, storage space and handling; $k^l$ per unit and period.' },
+  { world: 4, term: 'Backlog', def: 'Demand fulfilled late: (cumulative demand − cumulative production)⁺; costs $k^b$ per unit and period; $B_T = 0$.' },
+  { world: 4, term: 'Inventory balance equation', def: '$L_{t-1} + X_t - d_t = L_t$: stock at the end of t equals stock before plus production minus demand.' },
+  { world: 5, term: 'Setup process', def: 'Preparation of a production system for its task (e.g. rinsing the kettle).' },
+  { world: 5, term: 'Setup time', def: 'Time required for the setup; it reduces productive time.' },
+  { world: 5, term: 'Setup costs', def: 'Personnel, material and ramp-up (opportunity) costs of a setup; $s$ per setup.' },
+  { world: 5, term: 'Lot', def: 'The demand of several periods combined into one production run.' },
+  { world: 5, term: 'Lot-for-lot', def: 'Produce exactly each period’s demand; no stock, a setup in every period with demand.' },
+  { world: 5, term: 'Big M', def: 'A sufficiently large number ($M \\ge c$) in $X_t \\le M \\cdot \\Gamma_t$, linking production to the binary setup variable.' },
+];
+
+export interface Flashcard { id: string; front: string; back: string; world: number }
+export const FLASHCARDS: Flashcard[] = [
+  ...GLOSSARY.map((t, i) => ({ id: `g${i}`, front: t.term, back: t.def, world: t.world })),
+  { id: 'q1', world: 1, front: 'Difference between time-dependent and stochastic demand?', back: 'Time-dependent = the pattern changes over time (dynamics), possibly fully known. Stochastic = random, not known in advance (uncertainty).' },
+  { id: 'q2', world: 2, front: 'Resource capacity vs. process capacity vs. throughput?', back: 'Resource capacity: one station. Process capacity: min over stations. Throughput: min(demand, process capacity).' },
+  { id: 'q3', world: 2, front: 'Effect of a parallel machine on cycle time and bottleneck?', back: 'Cycle time unchanged. Capacity of that station doubles; process capacity rises only if it was the bottleneck, and the bottleneck may move.' },
+  { id: 'q5', world: 4, front: 'Chase vs. level vs. optimal cost in the lecture example?', back: 'Chase 59,760 EUR (only overtime) · Level 33,220 EUR (only inventory) · Optimal 30,940 EUR (inventory 26,620 + overtime 4,320).' },
+  { id: 'q6', world: 4, front: 'When is the chase strategy optimal?', back: 'When overtime is not more expensive than holding a unit for one period ($k^o \\le k^l$): pre-producing never pays off.' },
+  { id: 'q7', world: 4, front: 'What changes with backlog in the model?', back: 'New variable $B_t$ and cost $k^b$; balance $L_{t-1} - B_{t-1} + X_t - d_t = L_t - B_t$; and $B_T = 0$.' },
+  { id: 'q8', world: 5, front: 'Lot sizing example: lot-for-lot, lot = capacity, optimal?', back: '1,000 EUR (10 setups) · 900 EUR (2 setups + 700 holding) · 580 EUR (setups in periods 1, 4, 8: 300 + 280).' },
+  { id: 'q9', world: 5, front: 'How does $X_t \\le M \\cdot \\Gamma_t$ work?', back: '$\\Gamma_t = 0$ forces $X_t \\le 0$, so producing needs $\\Gamma_t = 1$. $\\Gamma_t = 1$ without production only adds cost $s$, so the optimum avoids it.' },
+  { id: 'q10', world: 5, front: 'Effect of higher $s$ or higher $k^l$ on the number of setups?', back: 'Higher setup cost $s$ → fewer setups (bigger lots). Higher holding cost $k^l$ → more setups (smaller lots).' },
+  { id: 'q4', world: 2, front: 'Knife line (8, 10, 5, 2, 1 min): bottleneck, process capacity, cycle time?', back: 'Grinding (10 min), 6 per hour, 26 minutes.' },
+];

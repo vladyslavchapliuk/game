@@ -1,0 +1,91 @@
+/* Design tokens from the Astra v2 package (tokens/design-tokens.css). Re-copy on design updates. */
+:root, [data-theme="sunny-brewery"] {
+  --canvas: #DBCEA7;
+  --surface: #FFF1D0;
+  --raised: #FFF8E8;
+  --text: #2A231B;
+  --muted: #62503C;
+  --line: #826445;
+  --soft: #E9D4A6;
+  --primary: #3F5B32;
+  --on-primary: #FFF6DB;
+  --accent: #F6C34D;
+  --on-accent: #292218;
+  --success: #286044;
+  --danger: #9B3036;
+  --info: #2B5983;
+  --focus: #1E5798;
+  --scrim: #241A13;
+  --chart: #233E32;
+  --room-1: #684291;
+  --room-2: #854619;
+  --room-3: #285B82;
+  --room-4: #8A441D;
+  --room-5: #30562E;
+  --room-6: #963357;
+}
+[data-theme="evening-pub"] {
+  --canvas: #17251F;
+  --surface: #273A30;
+  --raised: #344A3A;
+  --text: #FFF1CC;
+  --muted: #CCCAAE;
+  --line: #BCA67B;
+  --soft: #445A43;
+  --primary: #F6C34D;
+  --on-primary: #292218;
+  --accent: #F6C34D;
+  --on-accent: #292218;
+  --success: #AAD9AF;
+  --danger: #FFB8B6;
+  --info: #A4CFF5;
+  --focus: #A4CFF5;
+  --scrim: #100C09;
+  --chart: #172B23;
+  --room-1: #DDC1FF;
+  --room-2: #FFD29B;
+  --room-3: #BFE5FF;
+  --room-4: #FFD097;
+  --room-5: #CBE5AB;
+  --room-6: #FFBFDB;
+}
+:root {
+  --font-ui: "Nunito", sans-serif;
+  --font-math: "KaTeX_Main", serif;
+  --type-display: 56px;
+  --type-h1: 36px;
+  --type-h2: 26px;
+  --type-h3: 22px;
+  --type-body: 18px;
+  --type-small: 16px;
+  --type-caption: 14px;
+  --type-math: 24px;
+  --space-4: 4px;
+  --space-8: 8px;
+  --space-12: 12px;
+  --space-16: 16px;
+  --space-24: 24px;
+  --space-32: 32px;
+  --space-40: 40px;
+  --space-48: 48px;
+  --space-64: 64px;
+  --radius-control: 14px;
+  --radius-card: 22px;
+  --radius-panel: 28px;
+  --radius-pill: 999px;
+  --shadow-card: 0 5px 0 #38291F21;
+  --art-stroke: 5px;
+  --control-stroke: 2px;
+  --focus-width: 3px;
+  --focus-offset: 4px;
+  --target-min: 48px;
+  --glow-color: #FFD77780;
+  --glow-radius: 200px;
+  --motion-quick: 120ms;
+  --motion-standard: 220ms;
+  --motion-bounce: 360ms;
+  --motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* v2 illustrated materials and motion */
+:root { --ink: #211B16; --timber: #573720; --brass: #D1AA5D; --parchment: #FFF1D0; --forest: #273E32; --hud-height: 100px; --motion-hover: 140ms; --motion-press: 70ms; --motion-release: 160ms; --motion-drawer: 240ms; --motion-coin: 640ms; --ease-settle: cubic-bezier(.22,1,.36,1); }
