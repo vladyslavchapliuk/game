@@ -29,19 +29,61 @@ export function OutcomeScreen() {
   const f = grade.factory;
   const pl = grade.plan;
   const eurs = (x: number) => `${Math.round(x).toLocaleString('en-US')} EUR`;
-  if (pl) {
+  const sel = grade.select;
+  const st = grade.staff;
+  if (sel) {
+    const planText = (x: number[]) => x.map((v, i) => `X${sel.keys[i]} = ${v}`).join(', ');
+    rows.push(['Your selection', planText(sel.plan)]);
+    rows.push(['Your revenue Z', eurs(sel.z)]);
+    rows.push(['Best integer selection', `${planText(sel.bestPlan)} → ${eurs(sel.best)}`]);
+    if (sel.outcome === 'too-much') {
+      headline = 'Bruno promised more than he can brew.';
+      rows.push(['Violated', sel.problems || 'constraints']);
+      advice = 'Check every resource row: $\\sum_i a_{ij} X_i \\le c_j$ and $X_i \\le d_i$. An infeasible plan earns nothing.';
+    } else if (sel.outcome === 'too-little') {
+      headline = 'Feasible, but money was left on the table.';
+      rows.push(['Revenue missed', eurs(sel.best - sel.z)]);
+      advice = 'Move the profit line outwards: the best plan sits where it last touches the feasible region.';
+    } else if (sel.outcome === 'good-enough') {
+      headline = 'A solid selection, close to the optimum.';
+      rows.push(['Gap to the optimum', eurs(sel.best - sel.z)]);
+      advice = 'Try swapping one project for another with more revenue per scarce resource.';
+    } else {
+      headline = 'The optimal selection. Every scarce block earns the most.';
+      advice = 'That is the integer optimum: no feasible plan earns more.';
+    }
+  } else if (st) {
+    const lbl = st.metric === 'wq' ? 'E[Wq]' : 'E[Ws]';
+    rows.push(['You hired', `${st.choice} (€${st.cost})`]);
+    rows.push([`Formula ${lbl} with this choice`, Number.isFinite(st.value) ? `${fmt(st.value, 1)} min` : '∞ (ρ ≥ 1)']);
+    rows.push(['Target', `${lbl} ≤ ${fmt(st.target, 1)} min`]);
+    rows.push(['Cheapest option that meets it', `${st.bestName} (€${st.bestCost})`]);
+    if (st.outcome === 'queue-fail') {
+      headline = 'The line grew out of the door.';
+      advice = 'Compute $\\rho = \\lambda/\\mu$ first, then $E[W_q] = \\frac{cv_a^2 + cv_s^2}{2} \\cdot \\frac{\\rho}{1-\\rho} \\cdot \\frac{1}{\\mu}$ for every option. Less variability can beat more speed.';
+    } else if (st.outcome === 'too-much') {
+      headline = 'Short waits, but Bruno overpaid for the bar.';
+      advice = `The target was met €${st.cost - st.bestCost} cheaper. Check the cheaper options with the formula before paying for speed.`;
+    } else if (st.outcome === 'good-enough') {
+      headline = 'Target met, slightly above the cheapest cost.';
+      advice = `€${st.cost - st.bestCost} could be saved. Variability reduction is often cheaper than a faster server.`;
+    } else {
+      headline = 'Target met at the lowest cost.';
+      advice = 'You balanced utilization and variability exactly as the formula suggests.';
+    }
+  } else if (pl) {
     rows.push(['Your relevant costs', eurs(pl.cost)]);
     rows.push([`Best simple rule (${pl.baselineName})`, eurs(pl.baseline)]);
     rows.push(['Cheapest possible plan (par)', eurs(pl.best)]);
     if (pl.outcome === 'bottleneck-fail') {
       headline = 'A lot bigger than the kettle can brew.';
       rows.push(['Units above capacity c', `${pl.overCap}`]);
-      advice = 'Every X_t must satisfy X_t ≤ c. Split the big lot and add a setup earlier.';
+      advice = 'Every lot must satisfy $X_t \\le c$. Split the big lot and add a setup earlier.';
     } else if (pl.outcome === 'too-little') {
       headline = 'Demand was not met in time.';
       rows.push(['Units of demand not met', `${pl.shortage}`]);
       advice = pl.model === 'aggregate'
-        ? 'Check the inventory row: L_t must never go negative (and B_T = 0 with backlog). Produce earlier or use overtime.'
+        ? 'Check the inventory row: $L_t$ must never go negative (and $B_T = 0$ with backlog). Produce earlier or use overtime.'
         : 'Each period must be covered by stock or a new lot. Look for red inventory cells.';
     } else if (pl.outcome === 'too-much') {
       headline = 'Feasible, but more expensive than a simple rule.';

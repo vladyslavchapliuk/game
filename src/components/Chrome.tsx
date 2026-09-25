@@ -14,7 +14,7 @@ const NAV = [
 ];
 const MORE = [
   { path: 'mastery', label: 'My mastery' },
-  { path: 'soon/exam', label: 'Exam drill' },
+  { path: 'exam', label: 'Exam drill' },
   { path: 'soon/duel', label: 'Duel' },
   { path: 'soon/room', label: 'Study room' },
   { path: 'soon/leaderboard', label: 'Leaderboard' },

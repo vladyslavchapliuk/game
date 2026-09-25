@@ -8,6 +8,9 @@ import { DEFAULT_LINE } from '../engine/line';
 import { PlanTable } from '../components/planning/PlanTable';
 import { LECTURE_AGGREGATE, LECTURE_LOTS, levelPlan, lotForLot, type AggregateData } from '../engine/planning';
 import { FactoryPlanner } from '../components/factory/FactoryPlanner';
+import { BarQueue } from '../components/bar/BarQueue';
+import { ProjectPlanner } from '../components/projects/ProjectPlanner';
+import { CHAIR_TABLE, THREE_PROJECTS } from '../engine/lp';
 import { ModelCard } from '../components/ModelCard';
 import { MODELS, SYMBOLS } from '../content/models';
 import { useStore, type ThemeSetting } from '../state/store';
@@ -33,7 +36,12 @@ export function StudyScreen({ tab: initial }: { tab?: string }) {
       </div>
       {tab === 'cards' && <Flashcards />}
       {tab === 'formulas' && (
-        <div className="stack">
+        <div className="stack formula-sheet">
+          <div className="parchment row between no-print">
+            <span>One printable page per topic group: <b>{FORMULAS.length} formulas</b> in the lecture's notation.</span>
+            <button className="tb gold" onClick={() => window.print()}>Print or save as PDF</button>
+          </div>
+          <h1 className="print-only">OPM 301 formula sheet · Monkey Brewery</h1>
           {topics.map((topic) => (
             <section key={topic} className="stack">
               <h2 className="section-title">{topic}</h2>
@@ -116,6 +124,8 @@ const SANDBOX_TABS = [
   { id: 'line', label: 'Production line' },
   { id: 'season', label: 'Season planner' },
   { id: 'lots', label: 'Lot sizing' },
+  { id: 'recipes', label: 'Project selection' },
+  { id: 'bar', label: 'Bar queue' },
 ] as const;
 
 const hashQuery = () => new URLSearchParams(window.location.hash.split('?')[1] ?? '');
@@ -136,10 +146,13 @@ export function SandboxScreen({ tab = 'line' }: { tab?: string }) {
     line: ['What if… we gave Bruno a second fermenter?', 'Change capacities, machines, buffer and order size. Press Try my production.'],
     season: [hallCap ? `Plan a season for your ${hallCap / 8} L/h hall` : 'Plan a season: overtime or inventory?', hallCap ? `Capacity c = ${hallCap} L per period (8 hours × process capacity). Demand follows the lecture's pattern, scaled to your hall.` : 'Edit demand, capacity and costs, then build a plan or reveal the optimal one.'],
     lots: ['Lot sizing lab: setups vs. storage', 'Edit demand, capacity, setup and holding costs. Click Γ_t cells to set brew days.'],
+    recipes: ['Recipe planner: which projects pay most?', 'Pick plans on the graph, slide the profit line, compare LP and IP.'],
+    bar: ['Bar queue lab: how long do guests wait?', 'Change arrivals, service time and variability. The curve shows the formula, the dot your shift.'],
   };
+  const [bigCase, setBigCase] = useState(false);
   return (
     <div className="page wide">
-      <RoomBackdrop room={current === 'season' ? 'barrel-cellar' : current === 'lots' ? 'kettle-room' : 'brewhouse'} />
+      <RoomBackdrop room={({ season: 'barrel-cellar', lots: 'kettle-room', recipes: 'recipe-office', bar: 'bar-counter' } as Record<string, string>)[current] ?? 'brewhouse'} />
       <Mission kicker={`Sandbox / ${SANDBOX_TABS.find((t) => t.id === current)!.label}`} title={titles[current][0]} sub={`${titles[current][1]} Nothing here affects your stars.`} />
       <div className="tabs" role="tablist">
         {SANDBOX_TABS.map((t) => (
@@ -149,6 +162,16 @@ export function SandboxScreen({ tab = 'line' }: { tab?: string }) {
       {current === 'line' && <ProductionLine initial={{ ...DEFAULT_LINE, order: 8 }} controls={{ caps: true, machines: [0, 1, 2], buffer: true, order: true }} reveal="after-run" />}
       {current === 'season' && <PlanTable key={hallCap} model="aggregate" data={seasonData} initial={seasonStart} editable paramsEditable presets={['chase', 'level', 'optimal', 'clear']} />}
       {current === 'lots' && <PlanTable model="lotsize" data={LECTURE_LOTS} initial={lotStart} editable paramsEditable presets={['lfl', 'cap', 'optimal', 'clear']} />}
+      {current === 'recipes' && (
+        <div className="stack">
+          <div className="seg" role="group" aria-label="Example">
+            <button className={!bigCase ? 'on' : ''} aria-pressed={!bigCase} onClick={() => setBigCase(false)}>Cream Ale vs. Tripel (2 projects)</button>
+            <button className={bigCase ? 'on' : ''} aria-pressed={bigCase} onClick={() => setBigCase(true)}>3 projects, 6 resources</button>
+          </div>
+          <ProjectPlanner key={bigCase ? 'big' : 'small'} data={bigCase ? THREE_PROJECTS : CHAIR_TABLE} helpers />
+        </div>
+      )}
+      {current === 'bar' && <BarQueue initial={{ lambdaPerHour: 10, serviceMin: 5, cva2: 1, cvs2: 1 }} controls={{ lambda: true, service: true, cva: true, cvs: true }} theory="always" />}
     </div>
   );
 }
@@ -195,8 +218,31 @@ function Toggle({ label, help, checked, onChange }: { label: string; help: strin
 }
 
 export function SettingsScreen() {
-  const { settings, setSetting, resetProgress } = useStore();
+  const { settings, setSetting, resetProgress, exportSave, importSave } = useStore();
   const [confirm, setConfirm] = useState(false);
+  const [saveMsg, setSaveMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const download = () => {
+    const blob = new Blob([exportSave()], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `monkey-brewery-progress-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 2000);
+    setSaveMsg({ ok: true, text: 'Progress file saved. Load it on another computer or browser to continue there.' });
+  };
+  const upload = (file: File | undefined) => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const err = importSave(String(reader.result ?? ''));
+      setSaveMsg(err ? { ok: false, text: err } : { ok: true, text: 'Progress loaded. Welcome back, advisor.' });
+    };
+    reader.onerror = () => setSaveMsg({ ok: false, text: 'The file could not be read.' });
+    reader.readAsText(file);
+  };
   return (
     <div className="page">
       <RoomBackdrop room="bar-counter" />
@@ -215,19 +261,27 @@ export function SettingsScreen() {
         <Toggle label="Reduced motion" help="No paddle, bubble or transfer motion; cutscenes show the final still." checked={settings.reducedMotion} onChange={(v) => setSetting('reducedMotion', v)} />
         <Toggle label="Skip all cutscenes" help="Go straight to the numbers after each level." checked={settings.skipCutscenes} onChange={(v) => setSetting('skipCutscenes', v)} />
         <div className="setting">
+          <span><b>Save progress to a file</b><small>Stars, coins, mastery, flashcards, exam results and settings as one small .json file.</small></span>
+          <button className="tb" onClick={download}>Save file</button>
+        </div>
+        <div className="setting">
+          <label htmlFor="load-save"><b>Load progress from a file</b><small>Replaces the progress in this browser with the file's.</small></label>
+          <span className="tb file-btn">Load file…<input id="load-save" type="file" accept="application/json,.json" onChange={(e) => { upload(e.target.files?.[0]); e.target.value = ''; }} /></span>
+        </div>
+        {saveMsg && <div className={`feedback ${saveMsg.ok ? 'ok' : 'bad'}`} role="status"><span className="icon">{saveMsg.ok ? '✓' : '!'}</span><div>{saveMsg.text}</div></div>}
+        <div className="setting">
           <span><b>Reset progress</b><small>Stars, coins, mastery and flashcards on this computer.</small></span>
           {confirm
             ? <span className="row"><button className="tb" onClick={() => setConfirm(false)}>Cancel</button><button className="tb" onClick={() => { resetProgress(); setConfirm(false); }}>Yes, reset</button></span>
             : <button className="tb" onClick={() => setConfirm(true)}>Reset…</button>}
         </div>
       </div>
-      <p className="muted" style={{ marginTop: 16, color: '#FFF1CD' }}>Progress is saved in this browser only.</p>
+      <p className="muted" style={{ marginTop: 16, color: '#FFF1CD' }}>Progress is saved in this browser. Use a progress file to move it to another computer.</p>
     </div>
   );
 }
 
 const SOON: Record<string, { title: string; text: string }> = {
-  exam: { title: 'Exam drill', text: 'Timed 90-point mock exams (12 questions, 90 minutes) mixing theory, modeling and calculations. Arrives once worlds 3–6 are in.' },
   duel: { title: 'Duel', text: 'Two players, the same randomized problem, fastest correct answer wins. Arrives with the online features.' },
   room: { title: 'Study room', text: 'Share a six-character room code and solve a case together. Arrives with the online features.' },
   leaderboard: { title: 'Leaderboard', text: 'Opt-in weekly class leaderboard with nicknames. Arrives with the online features.' },

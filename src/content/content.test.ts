@@ -122,3 +122,46 @@ describe('planning steps (worlds 4 + 5) are solvable and fair', () => {
     }
   });
 });
+
+import { bossMission, NIGHT_SHIFT } from './world6';
+import { bossProjects } from './world3';
+import { judgeStaffing, staffMetric } from '../engine/stochastic';
+import { CHAIR_TABLE, solveIP } from '../engine/lp';
+
+describe('world 6 staffing missions', () => {
+  it('festival night: the tap robot is the cheapest option that meets 10 min', () => {
+    const best = judgeStaffing(NIGHT_SHIFT, 0).best;
+    expect(NIGHT_SHIFT.options[best].name).toBe('Tap robot');
+    expect(staffMetric(NIGHT_SHIFT, NIGHT_SHIFT.options[best])).toBeCloseTo(6.75, 6);
+    expect(judgeStaffing(NIGHT_SHIFT, 0).outcome).toBe('queue-fail');
+    expect(judgeStaffing(NIGHT_SHIFT, 1).outcome).toBe('queue-fail');
+  });
+  it('random boss nights always have a unique cheapest feasible option that is not the fastest', () => {
+    let fallback = 0;
+    for (let seed = 1; seed <= 300; seed++) {
+      const m = bossMission(makeRng(seed));
+      if (m === NIGHT_SHIFT) { fallback++; continue; }
+      const v = judgeStaffing(m, 0);
+      expect(v.best).toBeGreaterThanOrEqual(0);
+      const ok = m.options.filter((o) => staffMetric(m, o) <= m.target);
+      expect(ok.filter((o) => o.cost === v.bestCost)).toHaveLength(1);
+      const fastest = Math.min(...m.options.map((o) => o.serviceMin));
+      expect(m.options[v.best].serviceMin).toBeGreaterThan(fastest);
+    }
+    expect(fallback).toBeLessThan(10);
+  });
+});
+
+describe('world 3 project boss', () => {
+  it('random menus have a unique interior optimum', () => {
+    let fallback = 0;
+    for (let seed = 1; seed <= 300; seed++) {
+      const p = bossProjects(makeRng(seed));
+      if (p === CHAIR_TABLE) { fallback++; continue; }
+      const ip = solveIP(p);
+      expect(ip.x[0]).toBeGreaterThan(0);
+      expect(ip.x[1]).toBeGreaterThan(0);
+    }
+    expect(fallback).toBeLessThan(10);
+  });
+});

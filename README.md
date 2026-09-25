@@ -6,11 +6,35 @@ A cozy 2D browser game for learning OPM 301 (Operations Management, Production p
 
 - **Mac or Windows, no install:** double-click `PLAY Monkey Brewery.html` (or `dist/index.html`). It opens in Chrome, Safari or Edge. Progress is saved in that browser.
 - **From GitHub:** click **Code → Download ZIP**, unzip it, and double-click `PLAY Monkey Brewery.html`. No install or build needed; the playable game is in `dist/`.
-- **Share with classmates:** upload the whole `dist` folder to any static host (GitHub Pages, Netlify, a university web space). From there it can be installed as an app via the browser's "Install" button and works offline.
+- **Play online (GitHub Pages):** in the GitHub repository open **Settings → Pages** and set **Source** to **GitHub Actions** once. After that, every push to `main` publishes the game at `https://<your-user>.github.io/<repo>/`. Share that link with classmates; it can be installed as an app via the browser's "Install" button and works offline.
+- **Other hosts:** upload the whole `dist` folder to any static host (Netlify, a university web space).
 
-## New in v0.4
+## New in v0.5
 
+- **World 3, Recipe Office: optimal project selection (Lecture II, ch. 3), 6 levels.**
+  - The lecture's "Chair vs. Table" example becomes Cream Ale vs. Tripel, with malt sacks and hop bales as the two resources. The optimum is 9,500 EUR at $X_C = 2$, $X_T = 3$.
+  - You classify the parts of the problem, build the model in the lecture's notation, and practise the "test yourself" questions on sum notation.
+  - A **graphical solution** shows the constraint lines, the feasible region and the integer points. You click points to pick a plan and slide the profit line to find the optimum.
+  - An **LP vs. IP** level uses the 3-project, 6-resource example: the LP relaxation gives 3,490.57 EUR, the rounded plan is infeasible, and complete enumeration of 432 candidates gives 2,800 EUR.
+  - The boss level generates a new random menu each time.
+- **World 6, Bar Counter: stochastic variability and single-server queues (tutorials and exercises 6–7), 8 levels.**
+  - **Dice Bar** with a sampling lab: roll the die up to 1,000 times and compare the results with $E = 10.50$ EUR, $V = 26.25$ EUR² and $cv = 0.49$.
+  - **Two machines** (exercise 6): $cv$ 0.17 vs. 0.10.
+  - **Variability buffers** (Stolletz & Tan 2024).
+  - A live **bar queue**: guests arrive at random and Bruno serves them one at a time. Two charts accompany it: the line length over the shift, and the "hockey stick" of $E[W_q]$ against $\rho$ from the formula, with the simulated shift marked on it.
+  - Covers the library tutorial (25 / 30 min, 5 guests) and the clock-controlled exercise (384 / 464 min, 5.16, $cv_s^2 \le 0.69$).
+  - A **staffing mission**: choose the cheapest bartender setup that meets a waiting-time target. Lower variability can beat more speed. The boss level generates random nights.
+- **Exam drill** (More → Exam drill): 10, 20 or 30 mixed questions from the topics you pick. There is one try per question, no hints and an optional timer.
+  - Each question shows the case it comes from.
+  - The report ranks topics by score and lists the solutions to the questions you missed, with a "drill my weak topics" button. Results feed into mastery.
+- **Progress file** (Settings): save stars, coins, mastery, flashcards and exam history as a `.json` file and load it on another computer or browser.
+- **Printable formula sheet** (Study desk → Formula sheet → Print or save as PDF). New formulas, glossary terms and flashcards cover chapters 3, 6 and 7.
+- **Sandbox**: new *Project selection* and *Bar queue* labs.
+- **Play online:** `.github/workflows/pages.yml` publishes `dist/` to GitHub Pages on every push (see below).
 - **Everything is open:** every room and level can be played from the start, in any order. Stars and mastery still track your progress.
+
+## What was in v0.4
+
 - **World 4, Barrel Cellar (aggregate planning), 8 levels:** production/cost tables over time, laid out like the lecture: $d_t$, $X_t$, $L_t$, $O_t$, $B_t$, inventory, overtime and backlog costs, and a sum column.
   - Uses the lecture example: 8 periods, $c = 750$, $k^l = 22$, $k^o = 72$. Chase costs 59,760, level 33,220, and the optimum 30,940.
   - Also covers the price shock ($k^o = 32$ / 112) and backlog ($k^b = 18$ → 30,700).
@@ -48,7 +72,7 @@ A cozy 2D browser game for learning OPM 301 (Operations Management, Production p
 - **Outcomes and cutscenes:** perfect (beach), good enough (banana), too much, too little (pink slip), bottleneck fail (wort surfing) and wrong classification. Cutscenes can be skipped, and each one is followed by a "What happened?" card with the numbers.
 - **Study desk:** flashcards with spaced repetition, a formula sheet and a glossary. Also included: sandbox, mastery, settings (theme, soda mode, reduced motion, skip cutscenes).
 - **Design (v0.3):** one slim top bar with navigation (no floating dock), a dimmed room backdrop, and clean inked cards.
-- Worlds 3 and 6, Exam drill, Duel, Study room and Leaderboard show "coming soon".
+- Duel, Study room and Leaderboard show "coming soon" (they need an online backend).
 
 ## Develop
 
@@ -56,7 +80,7 @@ A cozy 2D browser game for learning OPM 301 (Operations Management, Production p
 npm install
 npm run dev          # local dev server
 npm test             # formula, simulation and content tests
-npm run build        # builds dist/ (single-file index.html + dist/assets)
+npm run build        # builds dist/ (single-file index.html + dist/assets); commit dist/ so Pages and the ZIP stay playable
 npm run import-assets  # re-copy art from ../Monkey-Brewery-Redesign-v2
 python3 scripts/embed-svg-fonts.py   # re-run after import-assets (needs fonttools + brotli)
 ```
@@ -64,6 +88,7 @@ python3 scripts/embed-svg-fonts.py   # re-run after import-assets (needs fonttoo
 - Game content (levels, questions, hints, worked solutions) lives in `src/content/world*.ts`. A new lecture means adding a new world file.
 - The formulas are in `src/engine/opm.ts`. The production-line simulation is `src/engine/line.ts` (a discrete-event model; tests in `line.test.ts`).
 - The Factory Yard engine (machines, missions, best-plan solver) is in `src/engine/factory.ts`, and its sprites are in `src/components/factory/`.
+- Project selection (world 3) is in `src/engine/lp.ts` (LP by vertex enumeration, IP by complete enumeration). Variability and queues (world 6) are in `src/engine/stochastic.ts` (E, V, cv, the single-server formula, Little's law, a seeded queue simulation). Tests reproduce the lecture, tutorial and exercise numbers.
 - Planning (worlds 4 + 5) is in `src/engine/planning.ts`: table evaluation, chase/level/lot-for-lot rules, exact solvers and verdicts (tests reproduce every lecture number in `planning.test.ts`). The tables and charts are in `src/components/planning/PlanTable.tsx`, and the lecture models are in `src/content/models.ts`.
 - Text in `src/content` can contain inline formulas written as `$...$`, plus `**bold**` and `*italic*`.
 - The art comes from the Astra v2 package. Machine artwork is extracted into `src/components/production/art.ts`.

@@ -7,6 +7,7 @@ import { LevelScreen } from './screens/LevelScreen';
 import { OutcomeScreen } from './screens/OutcomeScreen';
 import { FactoryFreeScreen, MasteryScreen, SandboxScreen, SettingsScreen, SoonScreen, StudyScreen, WelcomeScreen } from './screens/OtherScreens';
 import { isLevelPlayable } from './content/worlds';
+import { ExamScreen } from './screens/ExamScreen';
 
 export default function App() {
   const parts = useRoute();
@@ -28,6 +29,7 @@ export default function App() {
     case 'sandbox': screen = <SandboxScreen tab={arg || 'line'} />; break;
     case 'factory': screen = <FactoryFreeScreen />; break;
     case 'mastery': screen = <MasteryScreen />; break;
+    case 'exam': screen = <ExamScreen />; break;
     case 'settings': screen = <SettingsScreen />; break;
     case 'soon': screen = <SoonScreen which={arg} />; break;
     default: screen = <MapScreen />;

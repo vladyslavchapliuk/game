@@ -6,6 +6,10 @@ import type { LineConfig } from '../engine/line';
 import type { LineControls } from '../components/production/ProductionLine';
 import type { AggregateData, LotData } from '../engine/planning';
 import type { Preset } from '../components/planning/PlanTable';
+import type { StaffMission } from '../engine/stochastic';
+import type { ProjectData } from '../engine/lp';
+import type { BarSetup, QueueControls } from '../components/bar/BarQueue';
+import type { LabDist } from '../components/bar/SampleLab';
 
 export type OutcomeKind =
   | 'perfect'
@@ -124,7 +128,44 @@ export type Step =
       mission?: boolean;
       inLecture?: string;
     }
-  | { kind: 'model'; modelId: string; title: string; body?: string };
+  | { kind: 'model'; modelId: string; title: string; body?: string }
+  | {
+      kind: 'sample';
+      title: string;
+      brief: string;
+      dists: LabDist[];
+      unit: string;
+      scale?: number;
+      face?: 'die' | 'value';
+      xLabel: string;
+      inLecture?: string;
+    }
+  | {
+      kind: 'queue';
+      title: string;
+      brief: string;
+      setup: BarSetup;
+      controls?: QueueControls;
+      theory?: 'always' | 'after-run' | 'never';
+      hours?: number;
+      /** The player must finish one shift before continuing. */
+      mustRun?: boolean;
+      /** Graded staffing decision: submitting ends the level. */
+      mission?: StaffMission;
+      inLecture?: string;
+    }
+  | {
+      kind: 'select';
+      title: string;
+      brief: string;
+      data: ProjectData;
+      start?: number[];
+      graph?: boolean;
+      helpers?: boolean;
+      /** Graded: submitting ends the level with a cutscene. */
+      mission?: boolean;
+      inLecture?: string;
+    };
 
 export interface Level {
   id: string;

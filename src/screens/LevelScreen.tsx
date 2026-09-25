@@ -11,8 +11,12 @@ import { Cutscene } from '../components/Cutscene';
 import { FactoryPlanner } from '../components/factory/FactoryPlanner';
 import { missionById } from '../engine/factory';
 import { PlanTable } from '../components/planning/PlanTable';
+import { BarQueue } from '../components/bar/BarQueue';
+import { SampleLab } from '../components/bar/SampleLab';
+import { ProjectPlanner } from '../components/projects/ProjectPlanner';
 import { ModelCard } from '../components/ModelCard';
 import { MODELS } from '../content/models';
+import { solveIP } from '../engine/lp';
 import { chasePlan, levelPlan, lotAtCapacity, lotForLot, type AggregateData, type LotData } from '../engine/planning';
 import { Rich, Tex } from '../components/Rich';
 import { Mission, RoomBackdrop } from '../components/Chrome';
@@ -51,7 +55,7 @@ export function LevelScreen({ id }: { id: string }) {
     else { setIndex(index + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }
   };
 
-  const wide = step.kind === 'plan' || step.kind === 'model' || step.kind === 'factory';
+  const wide = ['plan', 'model', 'factory', 'queue', 'select', 'sample'].includes(step.kind);
   return (
     <div className={`page ${wide ? 'wide' : ''}`}>
       <RoomBackdrop room={world.room} />
@@ -153,7 +157,65 @@ export function LevelScreen({ id }: { id: string }) {
         </div>
       )}
 
+      {step.kind === 'sample' && (
+        <div className="stack">
+          <StepHead label="Sampling lab" title={step.title} brief={step.brief} inLecture={step.inLecture} onNext={() => next()} />
+          <SampleLab key={`${level.id}-${index}`} dists={step.dists} unit={step.unit} scale={step.scale} face={step.face} xLabel={step.xLabel} />
+        </div>
+      )}
+
+      {step.kind === 'queue' && (
+        <div className="stack">
+          <StepHead label={step.mission ? 'Mission · one decision' : 'Bar counter'} title={step.title} brief={step.brief} inLecture={step.inLecture}
+            onNext={step.mission ? undefined : () => next()} nextLabel={step.mustRun && !lineDone ? 'Finish one shift to continue' : 'Continue'}
+            disabled={step.mustRun && !lineDone} />
+          <BarQueue key={`${level.id}-${index}`} initial={step.setup} controls={step.controls} theory={step.theory} hours={step.hours}
+            mission={step.mission} onRun={() => setLineDone(true)}
+            onSubmit={step.mission ? (v) => {
+              const m = step.mission!;
+              finish([...records, {
+                kind: 'staff', id: `${level.id}-${index}`, concept: 'w6.staffing', outcome: v.outcome, choice: m.options[v.choice].name,
+                cost: v.cost, bestCost: v.bestCost, bestName: v.best >= 0 ? m.options[v.best].name : '—', value: v.value, target: m.target, metric: m.metric,
+              }]);
+            } : undefined} />
+        </div>
+      )}
+
+      {step.kind === 'select' && (
+        <div className="stack">
+          <StepHead label={step.mission ? 'Mission · one submission' : 'Recipe planner'} title={step.title} brief={step.brief} inLecture={step.inLecture}
+            onNext={step.mission ? undefined : () => next()} />
+          <ProjectPlanner key={`${level.id}-${index}`} data={step.data} start={step.start} graph={step.graph} helpers={step.helpers}
+            onSubmit={step.mission ? (v, x) => {
+              const probs = [
+                ...v.check.overCapacity.map((j) => `not enough ${step.data.resources[j]}`),
+                ...v.check.overDemand.map((i) => `more ${step.data.projects[i]} than ordered`),
+              ].join(' · ');
+              finish([...records, {
+                kind: 'select', id: `${level.id}-${index}`, concept: 'w3.selection', outcome: v.outcome, z: v.z, best: v.best,
+                plan: x, keys: step.data.keys, bestPlan: solveIP(step.data).x, problems: probs,
+              }]);
+            } : undefined} />
+        </div>
+      )}
+
       {cutscene && <Cutscene kind={cutscene.outcome} onDone={() => go('outcome')} />}
+    </div>
+  );
+}
+
+function StepHead({ label, title, brief, inLecture, onNext, nextLabel = 'Continue', disabled = false }: {
+  label: string; title: string; brief: string; inLecture?: string; onNext?: () => void; nextLabel?: string; disabled?: boolean;
+}) {
+  return (
+    <div className="card row between">
+      <div style={{ flex: 1, minWidth: 260 }}>
+        <div className="card-label">{label}</div>
+        {inLecture && <span className="in-lecture">In the lecture: <Rich text={inLecture} as="span" /></span>}
+        <h2><Rich text={title} as="span" /></h2>
+        <p className="learn-body"><Rich text={brief} as="span" /></p>
+      </div>
+      {onNext && <button className="tb gold" disabled={disabled} onClick={onNext}>{nextLabel}</button>}
     </div>
   );
 }

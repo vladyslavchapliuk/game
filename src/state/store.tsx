@@ -12,6 +12,7 @@ export interface Settings {
 }
 export interface LevelProgress { stars: number; passed: boolean; plays: number }
 export interface CardState { box: number; due: number }
+export interface ExamResult { date: number; score: number; total: number; worlds: number[]; seconds: number }
 export interface Progress {
   levels: Record<string, LevelProgress>;
   coins: number;
@@ -19,11 +20,14 @@ export interface Progress {
   concepts: Record<string, boolean[]>;
   cards: Record<string, CardState>;
   onboarded: boolean;
+  /** Finished exam drills, newest last. */
+  exams: ExamResult[];
 }
 export interface LastRun { levelId: string; grade: Grade; records: StepRecord[]; coins: number; seed: number }
 
 const DEFAULT_SETTINGS: Settings = { theme: 'auto', soda: false, sound: true, reducedMotion: false, skipCutscenes: false };
-const EMPTY: Progress = { levels: {}, coins: 0, concepts: {}, cards: {}, onboarded: false };
+const EMPTY: Progress = { levels: {}, coins: 0, concepts: {}, cards: {}, onboarded: false, exams: [] };
+export const SAVE_FORMAT = 'monkey-brewery-save';
 const KEY = 'monkey-brewery/v1';
 
 // Storage can be unavailable (private windows, blocked site data): never crash.
@@ -49,6 +53,11 @@ interface Store {
   reviewCard: (id: string, ok: 'again' | 'hard' | 'good') => void;
   setOnboarded: () => void;
   resetProgress: () => void;
+  recordExam: (result: ExamResult, answers: { concept: string; ok: boolean }[]) => void;
+  /** A JSON save file with settings and progress. */
+  exportSave: () => string;
+  /** Replace settings and progress from a save file; returns an error message or null. */
+  importSave: (json: string) => string | null;
   totalStars: number;
 }
 
@@ -128,6 +137,26 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     settings, progress, lastRun, resolvedTheme, setSetting, finishLevel, mastery, reviewCard,
     setOnboarded: () => setProgress((p) => ({ ...p, onboarded: true })),
     resetProgress: () => { setProgress({ ...EMPTY, onboarded: true }); setLastRun(undefined); },
+    recordExam: (result, answers) => setProgress((p) => {
+      const concepts = { ...p.concepts };
+      for (const a of answers) concepts[a.concept] = [...(concepts[a.concept] ?? []), a.ok].slice(-5);
+      return { ...p, concepts, exams: [...(p.exams ?? []), result].slice(-30) };
+    }),
+    exportSave: () => JSON.stringify({ format: SAVE_FORMAT, version: 1, savedAt: new Date().toISOString(), settings, progress }, null, 2),
+    importSave: (json) => {
+      try {
+        const data = JSON.parse(json);
+        if (data?.format !== SAVE_FORMAT || typeof data.progress !== 'object' || !data.progress) return 'This is not a Monkey Brewery save file.';
+        const lv = data.progress.levels;
+        if (lv && typeof lv !== 'object') return 'The save file is damaged.';
+        setSettings({ ...DEFAULT_SETTINGS, ...(data.settings ?? {}) });
+        setProgress({ ...EMPTY, ...data.progress, onboarded: true });
+        setLastRun(undefined);
+        return null;
+      } catch {
+        return 'The file could not be read as a save file.';
+      }
+    },
     totalStars,
   };
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

@@ -1,4 +1,4 @@
-// Study desk content: formula sheet, glossary and flashcards for worlds 1–2.
+// Study desk content: formula sheet, glossary and flashcards for all worlds.
 
 export interface Formula { name: string; tex: string; note: string; world: number; topic: string }
 export const FORMULAS: Formula[] = [
@@ -9,6 +9,10 @@ export const FORMULAS: Formula[] = [
   { world: 2, topic: 'Process analysis', name: 'Throughput', tex: '\\text{th} = \\min\\{\\text{demand}, \\text{process capacity}\\}', note: 'Supply-constrained if demand ≥ capacity, else demand-constrained.' },
   { world: 2, topic: 'Process analysis', name: 'Utilization', tex: 'u = \\frac{\\text{actual production rate}}{\\text{maximum production rate}}', note: 'Packing machine: 25 / 30 = 83.33%. Only the bottleneck reaches 100%.' },
   { world: 2, topic: 'Process analysis', name: 'Processing time of a batch', tex: 't = \\frac{\\text{batch size}}{\\text{capacity}} \\times 3600\\ \\text{s}', note: 'Brewhouse: 0.1 L at 60 / 40 / 50 L/h → 6 / 9 / 7.2 s.' },
+  // Lecture II ch. 3 — project selection
+  { world: 3, topic: 'Project selection', name: 'Objective: revenue', tex: '\\max Z = \\sum_{i=1}^{I} e_i \\cdot X_i', note: 'Resources are sunk costs, so only revenue differs between plans. Chair vs. table: 9,500 at $X_C = 2$, $X_T = 3$.' },
+  { world: 3, topic: 'Project selection', name: 'Resource capacity', tex: '\\sum_{i=1}^{I} a_{ij} \\cdot X_i \\le c_j \\quad \\forall j \\in \\{1, \\dots, J\\}', note: 'One constraint per resource: $X_C + 2X_T \\le 8$ for the large blocks (hop bales).' },
+  { world: 3, topic: 'Project selection', name: 'Demand and integrality', tex: '\\begin{gathered} X_i \\le d_i \\quad \\forall i \\\\ X_i \\ge 0, \\; X_i \\text{ integer} \\end{gathered}', note: 'Integer = IP. Dropping integrality gives the LP relaxation (3 projects: 3,490.57 vs. 2,800).' },
   // Lecture II ch. 4 — aggregate planning
   { world: 4, topic: 'Aggregate planning', name: 'Inventory balance', tex: 'L_{t-1} + X_t - d_t = L_t, \\quad L_0 = 0', note: 'With $L_t \\ge 0$ it forces demand to be met in every period.' },
   { world: 4, topic: 'Aggregate planning', name: 'Capacity with overtime', tex: 'X_t \\le c + O_t', note: 'Overtime $O_t$ extends capacity at $k^o$ per unit.' },
@@ -28,6 +32,8 @@ export const FORMULAS: Formula[] = [
   { world: 6, topic: 'Queues', name: 'Expected waiting time (single server)', tex: 'E[W_q] = \\frac{cv_a^2 + cv_s^2}{2} \\cdot \\frac{\\rho}{1-\\rho} \\cdot \\frac{1}{\\mu}', note: 'Exercise 7: $cv_a^2 = 0$, $cv_s^2 = 1.2$, $\\rho = 8/9$ → 384 min.' },
   { world: 6, topic: 'Queues', name: 'Cycle time', tex: 'E[W_s] = E[W_q] + \\frac{1}{\\mu}', note: '384 + 80 = 464 min.' },
   { world: 6, topic: "Queues", name: "Little's law", tex: 'E[L_s] = \\lambda \\cdot E[W_s]', note: '(60/90) × (464/60) = 5.16 workpieces.' },
+  { world: 6, topic: 'Queues', name: 'Waiting guests', tex: 'E[L_q] = \\lambda \\cdot E[W_q]', note: "Little's law for the line only. Library: $\\frac{10}{60} \\cdot 25 = 4.17$ waiting on average." },
+  { world: 6, topic: 'Stochastic variability', name: 'Scaling a random variable', tex: '\\begin{gathered} E[kX] = k\\,E[X] \\qquad V[kX] = k^2\\,V[X] \\\\ cv(kX) = cv(X) \\end{gathered}', note: 'Dice Bar: 3 EUR per beer → $E = 10.50$, $V = 26.25$, $cv = 0.49$.' },
 ];
 
 export interface Term { term: string; def: string; world: number }
@@ -63,6 +69,20 @@ export const GLOSSARY: Term[] = [
   { world: 5, term: 'Setup costs', def: 'Personnel, material and ramp-up (opportunity) costs of a setup; $s$ per setup.' },
   { world: 5, term: 'Lot', def: 'The demand of several periods combined into one production run.' },
   { world: 5, term: 'Lot-for-lot', def: 'Produce exactly each period’s demand; no stock, a setup in every period with demand.' },
+  { world: 3, term: 'Optimization model', def: 'Simplified mathematical representation of reality that reflects all alternatives, has a measurable objective and supports decisions.' },
+  { world: 3, term: 'Parameter', def: 'Given input data of a model, e.g. $c_j$, $a_{ij}$, $e_i$, $d_i$.' },
+  { world: 3, term: 'Decision variable', def: 'Value the model chooses, e.g. the project quantities $X_i$.' },
+  { world: 3, term: 'Feasible solution', def: 'A plan that satisfies all constraints. Infeasible: at least one constraint is violated. Optimal: feasible and no feasible plan is better.' },
+  { world: 3, term: 'Linear program (LP)', def: 'Linear objective and constraints, real-valued variables. Solved graphically or with the simplex algorithm.' },
+  { world: 3, term: 'Integer program (IP)', def: 'Like an LP but with integer variables. Solved by complete enumeration, heuristics or branch and bound.' },
+  { world: 3, term: 'LP relaxation', def: 'The IP without the integer constraints; its optimum is an upper bound (for maximization). Rounding it can be infeasible.' },
+  { world: 3, term: 'Sunk costs', def: 'Costs already paid that do not change with the decision (the blocks, malt and hops in stock).' },
+  { world: 6, term: 'Random variable', def: 'A quantity whose value is uncertain before it is observed, described by values $x_i$ and probabilities $p(x_i)$.' },
+  { world: 6, term: 'Coefficient of variation', def: '$cv = \\sigma / E[X]$: spread relative to the mean; compares variability of quantities with different scales.' },
+  { world: 6, term: 'Utilization (queue)', def: '$\\rho = \\lambda / \\mu$: share of time the server is busy. Depends only on the means.' },
+  { world: 6, term: "Little's law", def: '$E[L_s] = th \\cdot E[W_s]$ in any stable system; in steady state $th = \\lambda$.' },
+  { world: 6, term: 'Variability buffer', def: 'What absorbs a mismatch of supply and demand: inventory (early match), waiting / lead time (late match), capacity, or lost customers.' },
+  { world: 6, term: 'Stable queue', def: 'A queue with $\\rho < 1$. With $\\rho \\ge 1$ the line grows without limit.' },
   { world: 5, term: 'Big M', def: 'A sufficiently large number ($M \\ge c$) in $X_t \\le M \\cdot \\Gamma_t$, linking production to the binary setup variable.' },
 ];
 
@@ -78,5 +98,10 @@ export const FLASHCARDS: Flashcard[] = [
   { id: 'q8', world: 5, front: 'Lot sizing example: lot-for-lot, lot = capacity, optimal?', back: '1,000 EUR (10 setups) · 900 EUR (2 setups + 700 holding) · 580 EUR (setups in periods 1, 4, 8: 300 + 280).' },
   { id: 'q9', world: 5, front: 'How does $X_t \\le M \\cdot \\Gamma_t$ work?', back: '$\\Gamma_t = 0$ forces $X_t \\le 0$, so producing needs $\\Gamma_t = 1$. $\\Gamma_t = 1$ without production only adds cost $s$, so the optimum avoids it.' },
   { id: 'q10', world: 5, front: 'Effect of higher $s$ or higher $k^l$ on the number of setups?', back: 'Higher setup cost $s$ → fewer setups (bigger lots). Higher holding cost $k^l$ → more setups (smaller lots).' },
+  { id: 'q11', world: 3, front: 'Chair vs. table: model and optimum?', back: '$\\max 1000X_C + 2500X_T$ s.t. $2X_C + 2X_T \\le 12$, $X_C + 2X_T \\le 8$, $X_C \\le 6$, $X_T \\le 3$, integer. Optimum $X_C = 2$, $X_T = 3$, $Z = 9{,}500$.' },
+  { id: 'q12', world: 3, front: 'Solution approaches for LP vs. IP?', back: 'LP: graphical solution, simplex. IP: complete enumeration, heuristics, branch and bound.' },
+  { id: 'q13', world: 6, front: 'Dice Bar (3 EUR per beer): E, V, σ, cv of the cost?', back: '$E = 10.50$ EUR, $V = 26.25$ EUR², $\\sigma = 5.12$ EUR, $cv = 0.49$.' },
+  { id: 'q14', world: 6, front: 'Library queue: λ = 10/h, 1/µ = 5 min, $cv_a^2 = cv_s^2 = 1$?', back: '$\\rho = 5/6$, $E[W_q] = 25$ min, $E[W_s] = 30$ min, $E[L_s] = 5$.' },
+  { id: 'q15', world: 6, front: 'Does more service variability raise utilization?', back: 'No. $\\rho = \\lambda / \\mu$ depends only on the means; variability raises the waiting time.' },
   { id: 'q4', world: 2, front: 'Knife line (8, 10, 5, 2, 1 min): bottleneck, process capacity, cycle time?', back: 'Grinding (10 min), 6 per hour, 26 minutes.' },
 ];

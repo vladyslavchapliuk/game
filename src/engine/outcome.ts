@@ -2,6 +2,8 @@ import type { FailKind, OutcomeKind } from '../content/types';
 import type { PlanResult } from './opm';
 import type { FactoryOutcome } from './factory';
 import type { PlanOutcome } from './planning';
+import type { SelectionOutcome } from './lp';
+import type { StaffOutcome } from './stochastic';
 
 export type QuestionResult = 'first' | 'assisted' | 'revealed';
 
@@ -15,6 +17,14 @@ export type StepRecord =
   | {
       kind: 'plan'; id: string; concept: string; model: 'aggregate' | 'lotsize'; outcome: PlanOutcome; cost: number; best: number;
       baseline: number; baselineName: string; shortage: number; overCap: number;
+    }
+  | {
+      kind: 'select'; id: string; concept: string; outcome: SelectionOutcome; z: number; best: number;
+      plan: number[]; keys: string[]; bestPlan: number[]; problems: string;
+    }
+  | {
+      kind: 'staff'; id: string; concept: string; outcome: StaffOutcome; choice: string; cost: number; bestCost: number;
+      bestName: string; value: number; target: number; metric: 'wq' | 'ws';
     };
 
 export interface Grade {
@@ -27,6 +37,8 @@ export interface Grade {
   failedDecision?: Extract<StepRecord, { kind: 'decision' }>;
   factory?: Extract<StepRecord, { kind: 'factory' }>;
   plan?: Extract<StepRecord, { kind: 'plan' }>;
+  select?: Extract<StepRecord, { kind: 'select' }>;
+  staff?: Extract<StepRecord, { kind: 'staff' }>;
 }
 
 /**
@@ -52,13 +64,15 @@ export const gradeLevel = (records: StepRecord[], failKind: FailKind): Grade => 
     const stars = ok ? (Math.min(cap, qStars) as 1 | 2 | 3) : 0;
     return { outcome: factory.outcome, stars, passed: ok, firstTry, total, revealed, factory };
   }
-  const plan = records.find((r): r is Extract<StepRecord, { kind: 'plan' }> => r.kind === 'plan');
-  if (plan) {
-    const ok = plan.outcome === 'perfect' || plan.outcome === 'good-enough';
-    const cap: 0 | 2 | 3 = plan.outcome === 'perfect' ? 3 : ok ? 2 : 0;
+  const mission = records.find(
+    (r): r is Extract<StepRecord, { kind: 'plan' | 'select' | 'staff' }> => r.kind === 'plan' || r.kind === 'select' || r.kind === 'staff',
+  );
+  if (mission) {
+    const ok = mission.outcome === 'perfect' || mission.outcome === 'good-enough';
+    const cap: 0 | 2 | 3 = mission.outcome === 'perfect' ? 3 : ok ? 2 : 0;
     const qStars = revealed === 0 && assisted === 0 ? 3 : revealed === 0 ? 2 : 1;
     const stars = ok ? (Math.min(cap, qStars) as 1 | 2 | 3) : 0;
-    return { outcome: plan.outcome, stars, passed: ok, firstTry, total, revealed, plan };
+    return { outcome: mission.outcome, stars, passed: ok, firstTry, total, revealed, [mission.kind]: mission };
   }
   if (failedDecision) {
     return { outcome: failedDecision.plan.kind as FailKind, stars: 0, passed: false, firstTry, total, revealed, failedDecision };

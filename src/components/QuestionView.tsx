@@ -40,9 +40,11 @@ interface Props {
   q: Question;
   onDone: (result: QuestionResult) => void;
   onMood: (m: Mood, line: string) => void;
+  /** Exam mode: one try, no hints; the solution shows right after checking. */
+  exam?: boolean;
 }
 
-export function QuestionView({ q, onDone, onMood }: Props) {
+export function QuestionView({ q, onDone, onMood, exam = false }: Props) {
   const [answer, setAnswer] = useState<Answer | undefined>(() =>
     q.type === 'classify' ? q.items.map(() => -1) : q.type === 'tf' ? { tf: null, reason: null } : q.type === 'cube' ? [0, 0, 0] as CubeCorner : undefined);
   const [tries, setTries] = useState(0);
@@ -50,7 +52,7 @@ export function QuestionView({ q, onDone, onMood }: Props) {
   const [status, setStatus] = useState<'open' | 'right' | 'revealed'>('open');
   const [wrongMsg, setWrongMsg] = useState<string>();
 
-  useEffect(() => { onMood('focused', 'Take your time. Hints are there if you need them; they only cost a star.'); }, [q.id, onMood]);
+  useEffect(() => { if (!exam) onMood('focused', 'Take your time. Hints are there if you need them; they only cost a star.'); }, [q.id, onMood, exam]);
 
   const check = () => {
     if (!isComplete(q, answer)) {
@@ -71,7 +73,7 @@ export function QuestionView({ q, onDone, onMood }: Props) {
     play('wrong');
     const t = tries + 1;
     setTries(t);
-    if (t >= 3) {
+    if (exam || t >= 3) {
       setStatus('revealed');
       onMood('sweaty', 'Here is the worked solution. Read it once more.');
     } else {
@@ -97,17 +99,22 @@ export function QuestionView({ q, onDone, onMood }: Props) {
           <>
             {wrongMsg && <div className="feedback bad" role="status"><span className="icon">!</span><div>{wrongMsg}</div></div>}
             <button className="tb gold wide" onClick={check}>Check</button>
-            <button className="tb wide" disabled={hints >= 3} onClick={() => { setHints((h) => Math.min(3, h + 1)); play('click'); }}>
-              {hints >= 3 ? 'All hints shown' : `Hint · step ${hints + 1} of 3`}
-            </button>
-            <small className="muted">Hints lower your stars but never block you. After 3 wrong tries you get the worked solution.</small>
+            {!exam && (
+              <>
+                <button className="tb wide" disabled={hints >= 3} onClick={() => { setHints((h) => Math.min(3, h + 1)); play('click'); }}>
+                  {hints >= 3 ? 'All hints shown' : `Hint · step ${hints + 1} of 3`}
+                </button>
+                <small className="muted">Hints lower your stars but never block you. After 3 wrong tries you get the worked solution.</small>
+              </>
+            )}
+            {exam && <small className="muted">Exam mode: one try, no hints.</small>}
           </>
         )}
         {status !== 'open' && (
           <>
             <div className={`feedback ${status === 'right' ? 'ok' : 'bad'}`} role="status">
               <span className="icon">{status === 'right' ? '✓' : '!'}</span>
-              <div><b>{status === 'right' ? 'Correct.' : 'Solution'}</b> <Rich text={q.explain} as="span" /></div>
+              <div><b>{status === 'right' ? 'Correct.' : exam ? 'Not quite. Solution:' : 'Solution'}</b> <Rich text={q.explain} as="span" /></div>
             </div>
             <button className="tb green wide" onClick={() => onDone(result)} autoFocus>Continue</button>
           </>
